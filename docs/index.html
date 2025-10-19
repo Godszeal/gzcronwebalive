@@ -1,0 +1,192 @@
+<!-- docs/index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>gzcronwebalive — Docs & Live Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#000b02; --panel:#00130a; --neon:#00ff7f; --muted:#7fffcf; --glass: rgba(255,255,255,0.02);
+}
+html,body{height:100%;margin:0;font-family:"Fira Code", monospace;background:linear-gradient(180deg,#000a03,#00110a);color:#bfffe0}
+.wrap{max-width:1100px;margin:24px auto;padding:20px}
+header{display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;gap:12px;align-items:center}
+.logo{background:var(--neon);color:#00120a;padding:6px 10px;border-radius:6px;font-weight:800}
+h1{margin:0;font-size:20px;color:var(--neon)}
+.lead{color:#9fffd3;margin-top:4px;font-size:13px}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(0,255,127,0.06);padding:16px;border-radius:10px;margin-top:18px}
+pre{background:#001814;padding:12px;border-radius:8px;overflow:auto;color:#cffff0}
+.terminal{background:#000a04;border-radius:8px;padding:12px;color:var(--neon);height:320px;overflow:auto;font-size:13px;line-height:1.45}
+.controls{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.btn{background:transparent;border:1px solid rgba(0,255,127,0.12);color:var(--neon);padding:8px 10px;border-radius:6px;cursor:pointer}
+.kbd{background:#02160f;padding:4px 8px;border-radius:6px;color:var(--neon)}
+.small{font-size:13px;color:#9be8c9}
+.copy{float:right;background:var(--neon);color:#00120a;padding:6px 10px;border-radius:6px;border:none;cursor:pointer;font-weight:700}
+@keyframes glow {from {text-shadow:0 0 4px rgba(0,255,127,0.04)}50%{text-shadow:0 0 18px rgba(0,255,127,0.12)}}
+.glow{animation:glow 2.6s infinite}
+.cursor { display:inline-block; width:10px; height:18px; background:var(--neon); margin-left:6px; animation: blink 1s steps(2,start) infinite; vertical-align:middle; }
+@keyframes blink { 50% { opacity: 0; } }
+.code { background: rgba(0,0,0,0.22); padding:6px 8px; border-radius:6px; display:inline-block; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <div class="brand">
+        <div class="logo">GZ</div>
+        <div>
+          <h1 class="glow">gzcronwebalive — Keep your Node.js app online</h1>
+          <div class="lead small">Author: God's Zeal · <a style="color:#8fffd3" href="https://github.com/Godszeal/gzcronwebalive" target="_blank">github.com/Godszeal/gzcronwebalive</a></div>
+        </div>
+      </div>
+      <div class="small">Live demo uses SSE (Server-Sent Events). Start the example server to stream real logs.</div>
+    </header>
+
+    <section class="card">
+      <h2>Beginner-friendly step-by-step</h2>
+      <div style="margin-top:8px">
+        <div class="small"><strong>1)</strong> Create project: <code class="code">npm init -y</code></div>
+        <div class="small" style="margin-top:6px"><strong>2)</strong> Install: <code class="code">npm i gzcronwebalive</code></div>
+        <div class="small" style="margin-top:6px"><strong>3)</strong> Add to <code>index.js</code>:</div>
+        <pre>// index.js
+const { startCron, events } = require('gzcronwebalive');
+startCron();
+events.on('log', msg => console.log('CRON LOG:', msg));</pre>
+        <div class="small" style="margin-top:6px"><strong>4)</strong> Run: <code class="code">node index.js</code></div>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Live Terminal — real script output (typing animation)</h2>
+      <p class="small">This terminal connects to <code>/events</code> via SSE and displays logs emitted by the module (real runtime output). Each new log will be typed out with a cursor for realism.</p>
+      <div id="terminal" class="terminal"><div id="termInner">Waiting for events... start your server and click <strong>Connect</strong></div></div>
+      <div class="controls">
+        <button class="btn" onclick="connect()">Connect</button>
+        <button class="btn" onclick="disconnect()">Disconnect</button>
+        <button class="btn" onclick="clearTerminal()">Clear</button>
+      </div>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>Example server (SSE + docs)</h2>
+      <p class="small">Save the provided <code>example_server.js</code> and place this <code>index.html</code> under <code>docs/</code>. Start server with <code>node example_server.js</code> — open <code>http://localhost:3000/docs/index.html</code>.</p>
+      <button class="copy" onclick="copyText('serverCode')">Copy server.js</button>
+      <pre id="serverCode">// example_server.js
+const express = require('express');
+const http = require('http');
+const path = require('path');
+const { startCron, events } = require('./gzcronwebalive'); // local module copy
+
+const app = express();
+const server = http.createServer(app);
+app.use('/docs', express.static(path.join(__dirname, 'docs')));
+
+let clients = [];
+app.get('/events', (req, res) => {
+  res.setHeader('Content-Type','text/event-stream');
+  res.setHeader('Cache-Control','no-cache');
+  res.setHeader('Connection','keep-alive');
+  res.flushHeaders();
+  clients.push(res);
+  req.on('close', () => { clients = clients.filter(c => c !== res); });
+});
+
+events.on('log', msg => {
+  clients.forEach(res => res.write(`data: ${msg}\n\n`));
+});
+
+startCron(); // start the cron
+server.listen(process.env.PORT||3000, () => console.log('Server listening on port', process.env.PORT||3000));</pre>
+    </section>
+
+    <section class="card" style="margin-top:16px">
+      <h2>How logs are emitted</h2>
+      <pre>// in gzcronwebalive index.js
+const EventEmitter = require('events');
+const events = new EventEmitter();
+events.emit('log', '🔁 Pinging self...'); // every cron run
+module.exports = { startCron, events };</pre>
+      <p class="small">This pattern allows forwarding logs to web UIs, SSE, WebSockets or other sinks.</p>
+    </section>
+
+    <footer style="margin-top:18px" class="small">Made with ❤️ by God's Zeal — <a style="color:#8fffd3" href="https://github.com/Godszeal">github.com/Godszeal</a></footer>
+  </div>
+
+<script>
+// SSE + typing animation logic
+let es = null;
+const termInner = document.getElementById('termInner');
+let queue = [];
+let typing = false;
+const charDelay = 45; // typing speed ms per char
+
+function connect(){
+  if(es) return;
+  es = new EventSource('/events');
+  appendSystem('SSE: connecting...');
+  es.onmessage = e => {
+    enqueueLine(e.data);
+  };
+  es.onerror = () => { appendSystem('⚠️ SSE connection error'); disconnect(); };
+}
+
+function disconnect(){
+  if(es){ es.close(); es = null; appendSystem('SSE: disconnected'); }
+}
+
+function enqueueLine(text){
+  queue.push(text);
+  if(!typing) processQueue();
+}
+
+function processQueue(){
+  if(queue.length === 0){ typing = false; return; }
+  typing = true;
+  const line = queue.shift();
+  typeLine(line, () => setTimeout(processQueue, 150));
+}
+
+function typeLine(line, cb){
+  const container = document.createElement('div');
+  const span = document.createElement('span');
+  const cursor = document.createElement('span');
+  cursor.className = 'cursor';
+  container.appendChild(span);
+  container.appendChild(cursor);
+  termInner.appendChild(container);
+  termInner.parentElement.scrollTop = termInner.parentElement.scrollHeight;
+
+  let i=0;
+  function step(){
+    if(i <= line.length){
+      span.textContent = line.slice(0,i);
+      termInner.parentElement.scrollTop = termInner.parentElement.scrollHeight;
+      i++;
+      setTimeout(step, charDelay);
+    } else {
+      cursor.remove();
+      if(cb) cb();
+    }
+  }
+  step();
+}
+
+function appendSystem(text){
+  const div = document.createElement('div');
+  div.textContent = text;
+  div.style.opacity = 0.85;
+  termInner.appendChild(div);
+  termInner.parentElement.scrollTop = termInner.parentElement.scrollHeight;
+}
+
+function clearTerminal(){
+  termInner.innerHTML = '';
+}
+
+function copyText(id){ navigator.clipboard.writeText(document.getElementById(id).innerText).then(()=>alert('Copied'));}
+</script>
+</body>
+</html>
