@@ -4,7 +4,8 @@
   "description": "Simple cron self-ping module to keep Node.js apps awake",
   "main": "example_server.js",
   "scripts": {
-    "start": "node example_server.js",
+    "start": "node example_server.js"
+  },
   "author": "God's Zeal",
   "license": "MIT",
   "keywords": ["cron", "keep-awake", "self-ping", "gzcronwebalive"],
