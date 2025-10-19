@@ -8,7 +8,7 @@ const app = express();
 const server = http.createServer(app);
 
 // serve docs
-app.use('/docs', express.static(path.join(__dirname, 'docs')));
+app.use('/', express.static(path.join(__dirname, 'docs')));
 
 // SSE endpoint
 let clients = [];
