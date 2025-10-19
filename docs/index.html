@@ -1,45 +1,564 @@
-<!-- docs/index.html -->
 <!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
 <title>gzcronwebalive — Docs & Live Demo</title>
-<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <style>
 :root{
-  --bg:#000b02; --panel:#00130a; --neon:#00ff7f; --muted:#7fffcf; --glass: rgba(255,255,255,0.02);
+  --bg: #000b02;
+  --panel: #00130a;
+  --neon: #00ff7f;
+  --neon-glow: 0 0 10px rgba(0,255,127,0.7), 0 0 20px rgba(0,255,127,0.5), 0 0 30px rgba(0,255,127,0.3);
+  --muted: #7fffcf;
+  --glass: rgba(255,255,255,0.02);
+  --grid-color: rgba(0,255,127,0.05);
 }
-html,body{height:100%;margin:0;font-family:"Fira Code", monospace;background:linear-gradient(180deg,#000a03,#00110a);color:#bfffe0}
-.wrap{max-width:1100px;margin:24px auto;padding:20px}
-header{display:flex;align-items:center;justify-content:space-between}
-.brand{display:flex;gap:12px;align-items:center}
-.logo{background:var(--neon);color:#00120a;padding:6px 10px;border-radius:6px;font-weight:800}
-h1{margin:0;font-size:20px;color:var(--neon)}
-.lead{color:#9fffd3;margin-top:4px;font-size:13px}
-.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));border:1px solid rgba(0,255,127,0.06);padding:16px;border-radius:10px;margin-top:18px}
-pre{background:#001814;padding:12px;border-radius:8px;overflow:auto;color:#cffff0}
-.terminal{background:#000a04;border-radius:8px;padding:12px;color:var(--neon);height:320px;overflow:auto;font-size:13px;line-height:1.45}
-.controls{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
-.btn{background:transparent;border:1px solid rgba(0,255,127,0.12);color:var(--neon);padding:8px 10px;border-radius:6px;cursor:pointer}
-.kbd{background:#02160f;padding:4px 8px;border-radius:6px;color:var(--neon)}
-.small{font-size:13px;color:#9be8c9}
-.copy{float:right;background:var(--neon);color:#00120a;padding:6px 10px;border-radius:6px;border:none;cursor:pointer;font-weight:700}
-@keyframes glow {from {text-shadow:0 0 4px rgba(0,255,127,0.04)}50%{text-shadow:0 0 18px rgba(0,255,127,0.12)}}
-.glow{animation:glow 2.6s infinite}
-.cursor { display:inline-block; width:10px; height:18px; background:var(--neon); margin-left:6px; animation: blink 1s steps(2,start) infinite; vertical-align:middle; }
-@keyframes blink { 50% { opacity: 0; } }
-.code { background: rgba(0,0,0,0.22); padding:6px 8px; border-radius:6px; display:inline-block; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+  font-family: "Fira Code", monospace;
+  background-color: var(--bg);
+  color: #bfffe0;
+  position: relative;
+  overflow-x: hidden;
+}
+
+/* Animated background grid */
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: 
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 30px 30px;
+  z-index: -1;
+  animation: gridMove 20s linear infinite;
+}
+
+@keyframes gridMove {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(30px, 30px); }
+}
+
+/* Scanline effect */
+.scanline {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 4px;
+  background: linear-gradient(to bottom, rgba(0,255,127,0.1), rgba(0,255,127,0.8), rgba(0,255,127,0.1));
+  z-index: 9999;
+  animation: scanline 3s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scanline {
+  0% { top: 0%; }
+  100% { top: 100%; }
+}
+
+.wrap {
+  max-width: 1100px;
+  margin: 24px auto;
+  padding: 20px;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 30px;
+  padding-bottom: 20px;
+  border-bottom: 1px solid rgba(0,255,127,0.1);
+}
+
+.brand {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.logo {
+  background: var(--neon);
+  color: #00120a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-weight: 800;
+  box-shadow: var(--neon-glow);
+  position: relative;
+  overflow: hidden;
+}
+
+.logo::after {
+  content: "";
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(to bottom right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%);
+  transform: rotate(30deg);
+  animation: shine 3s infinite;
+}
+
+@keyframes shine {
+  0% { transform: translateX(-100%) translateY(-100%) rotate(30deg); }
+  100% { transform: translateX(100%) translateY(100%) rotate(30deg); }
+}
+
+h1 {
+  margin: 0;
+  font-size: 20px;
+  color: var(--neon);
+  text-shadow: var(--neon-glow);
+  letter-spacing: -0.5px;
+}
+
+.lead {
+  color: #9fffd3;
+  margin-top: 4px;
+  font-size: 13px;
+}
+
+.card {
+  background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0.01));
+  border: 1px solid rgba(0,255,127,0.08);
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 24px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.4), 0 0 15px rgba(0,255,127,0.1);
+}
+
+.card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(to right, transparent, var(--neon), transparent);
+}
+
+h2 {
+  color: var(--neon);
+  margin-top: 0;
+  font-size: 18px;
+  text-shadow: 0 0 8px rgba(0,255,127,0.5);
+  position: relative;
+  display: inline-block;
+}
+
+h2::after {
+  content: "";
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 100%;
+  height: 1px;
+  background: linear-gradient(to right, var(--neon), transparent);
+}
+
+pre {
+  background: #001814;
+  padding: 16px;
+  border-radius: 8px;
+  overflow: auto;
+  color: #cffff0;
+  border: 1px solid rgba(0,255,127,0.1);
+  position: relative;
+  font-size: 14px;
+  margin-top: 15px;
+}
+
+pre::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--neon);
+  border-radius: 8px 0 0 8px;
+}
+
+.code-container {
+  position: relative;
+  margin-top: 15px;
+}
+
+.copy-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: rgba(0, 255, 127, 0.1);
+  border: 1px solid rgba(0, 255, 127, 0.3);
+  color: var(--neon);
+  padding: 6px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.2s ease;
+  z-index: 10;
+}
+
+.copy-btn:hover {
+  background: rgba(0, 255, 127, 0.2);
+  box-shadow: 0 0 8px rgba(0, 255, 127, 0.4);
+}
+
+.copy-btn.copied {
+  background: rgba(0, 255, 127, 0.3);
+  color: #00120a;
+}
+
+.terminal {
+  background: #000a04;
+  border-radius: 8px;
+  padding: 16px;
+  color: var(--neon);
+  height: 320px;
+  overflow: auto;
+  font-size: 13px;
+  line-height: 1.45;
+  border: 1px solid rgba(0,255,127,0.1);
+  font-family: "Fira Code", monospace;
+  position: relative;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  margin-top: 15px;
+}
+
+.terminal::before {
+  content: "terminal";
+  position: absolute;
+  top: -10px;
+  left: 10px;
+  background: #000a04;
+  padding: 0 8px;
+  font-size: 12px;
+  color: var(--neon);
+  border: 1px solid rgba(0,255,127,0.1);
+  border-radius: 4px;
+}
+
+.controls {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.btn {
+  background: transparent;
+  border: 1px solid rgba(0,255,127,0.15);
+  color: var(--neon);
+  padding: 8px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: "Fira Code", monospace;
+  font-size: 13px;
+  position: relative;
+  overflow: hidden;
+}
+
+.btn:hover {
+  background: rgba(0,255,127,0.1);
+  box-shadow: 0 0 10px rgba(0,255,127,0.3);
+  transform: translateY(-1px);
+}
+
+.btn:active {
+  transform: translateY(0);
+}
+
+.btn::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.btn:hover::after {
+  left: 100%;
+}
+
+.kbd {
+  background: #02160f;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--neon);
+  border: 1px solid rgba(0,255,127,0.2);
+  font-family: "Fira Code", monospace;
+  font-size: 12px;
+}
+
+.small {
+  font-size: 13px;
+  color: #9be8c9;
+}
+
+.copy {
+  float: right;
+  background: var(--neon);
+  color: #00120a;
+  padding: 8px 12px;
+  border-radius: 6px;
+  border: none;
+  cursor: pointer;
+  font-weight: 700;
+  font-family: "Fira Code", monospace;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 10px rgba(0,255,127,0.5);
+}
+
+.copy:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 0 15px rgba(0,255,127,0.7);
+}
+
+@keyframes glow {
+  from { text-shadow: 0 0 4px rgba(0,255,127,0.04) }
+  50% { text-shadow: 0 0 18px rgba(0,255,127,0.12) }
+}
+
+.glow {
+  animation: glow 2.6s infinite;
+}
+
+.cursor {
+  display: inline-block;
+  width: 10px;
+  height: 18px;
+  background: var(--neon);
+  margin-left: 6px;
+  animation: blink 1s steps(2, start) infinite;
+  vertical-align: middle;
+  box-shadow: 0 0 5px var(--neon);
+}
+
+@keyframes blink {
+  50% { opacity: 0; }
+}
+
+.code {
+  background: rgba(0,0,0,0.22);
+  padding: 6px 8px;
+  border-radius: 6px;
+  display: inline-block;
+  border: 1px solid rgba(0,255,127,0.1);
+  font-family: "Fira Code", monospace;
+  font-size: 13px;
+}
+
+a {
+  color: #8fffd3;
+  text-decoration: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+a:hover {
+  color: var(--neon);
+  text-shadow: 0 0 8px rgba(0,255,127,0.5);
+}
+
+a::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: var(--neon);
+  transition: width 0.3s ease;
+}
+
+a:hover::after {
+  width: 100%;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .wrap {
+    padding: 15px;
+  }
+  
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .brand {
+    margin-bottom: 10px;
+  }
+  
+  .card {
+    padding: 15px;
+  }
+  
+  pre {
+    padding: 12px;
+    font-size: 12px;
+  }
+  
+  .terminal {
+    height: 280px;
+    font-size: 12px;
+  }
+  
+  .controls {
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 480px) {
+  h1 {
+    font-size: 18px;
+  }
+  
+  .card {
+    padding: 12px;
+  }
+  
+  pre {
+    padding: 10px;
+    font-size: 11px;
+  }
+  
+  .terminal {
+    height: 240px;
+    font-size: 11px;
+  }
+}
+
+/* Terminal content styling */
+.terminal-line {
+  margin-bottom: 4px;
+}
+
+.terminal-prompt {
+  color: #7fffcf;
+}
+
+.terminal-command {
+  color: var(--neon);
+}
+
+.terminal-output {
+  color: #9be8c9;
+}
+
+.terminal-error {
+  color: #ff5555;
+}
+
+.terminal-success {
+  color: #55ff55;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0,20,10,0.5);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0,255,127,0.3);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0,255,127,0.5);
+}
+
+/* Footer styling */
+footer {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid rgba(0,255,127,0.1);
+  text-align: center;
+}
+
+/* Flicker animation for terminal-like feel */
+@keyframes flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.95; }
+}
+
+.terminal {
+  animation: flicker 5s infinite;
+}
+
+/* Inline code blocks */
+.inline-code-container {
+  position: relative;
+  display: inline-block;
+}
+
+.inline-copy-btn {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: rgba(0, 255, 127, 0.1);
+  border: 1px solid rgba(0, 255, 127, 0.3);
+  color: var(--neon);
+  padding: 2px 6px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 10px;
+  opacity: 0;
+  transition: all 0.2s ease;
+  z-index: 5;
+}
+
+.inline-code-container:hover .inline-copy-btn {
+  opacity: 1;
+}
+
+.inline-copy-btn:hover {
+  background: rgba(0, 255, 127, 0.2);
+  box-shadow: 0 0 5px rgba(0, 255, 127, 0.4);
+}
 </style>
 </head>
 <body>
+  <div class="scanline"></div>
+  
   <div class="wrap">
     <header>
       <div class="brand">
         <div class="logo">GZ</div>
         <div>
           <h1 class="glow">gzcronwebalive — Keep your Node.js app online</h1>
-          <div class="lead small">Author: God's Zeal · <a style="color:#8fffd3" href="https://github.com/Godszeal/gzcronwebalive" target="_blank">github.com/Godszeal/gzcronwebalive</a></div>
+          <div class="lead small">Author: God's Zeal · <a href="https://github.com/Godszeal/gzcronwebalive" target="_blank">github.com/Godszeal/gzcronwebalive</a></div>
         </div>
       </div>
       <div class="small">Live demo uses SSE (Server-Sent Events). Start the example server to stream real logs.</div>
@@ -48,33 +567,61 @@ pre{background:#001814;padding:12px;border-radius:8px;overflow:auto;color:#cffff
     <section class="card">
       <h2>Beginner-friendly step-by-step</h2>
       <div style="margin-top:8px">
-        <div class="small"><strong>1)</strong> Create project: <code class="code">npm init -y</code></div>
-        <div class="small" style="margin-top:6px"><strong>2)</strong> Install: <code class="code">npm i gzcronwebalive</code></div>
+        <div class="small"><strong>1)</strong> Create project: 
+          <span class="inline-code-container">
+            <code class="code">npm init -y</code>
+            <button class="inline-copy-btn" onclick="copyInlineCode(this)"><i class="fas fa-copy"></i></button>
+          </span>
+        </div>
+        <div class="small" style="margin-top:6px"><strong>2)</strong> Install: 
+          <span class="inline-code-container">
+            <code class="code">npm i gzcronwebalive</code>
+            <button class="inline-copy-btn" onclick="copyInlineCode(this)"><i class="fas fa-copy"></i></button>
+          </span>
+        </div>
         <div class="small" style="margin-top:6px"><strong>3)</strong> Add to <code>index.js</code>:</div>
-        <pre>// index.js
+        <div class="code-container">
+          <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+          <pre>// index.js
 const { startCron, events } = require('gzcronwebalive');
 startCron();
 events.on('log', msg => console.log('CRON LOG:', msg));</pre>
-        <div class="small" style="margin-top:6px"><strong>4)</strong> Run: <code class="code">node index.js</code></div>
+        </div>
+        <div class="small" style="margin-top:6px"><strong>4)</strong> Run: 
+          <span class="inline-code-container">
+            <code class="code">node index.js</code>
+            <button class="inline-copy-btn" onclick="copyInlineCode(this)"><i class="fas fa-copy"></i></button>
+          </span>
+        </div>
       </div>
     </section>
 
     <section class="card" style="margin-top:16px">
       <h2>Live Terminal — real script output (typing animation)</h2>
       <p class="small">This terminal connects to <code>/events</code> via SSE and displays logs emitted by the module (real runtime output). Each new log will be typed out with a cursor for realism.</p>
-      <div id="terminal" class="terminal"><div id="termInner">Waiting for events... start your server and click <strong>Connect</strong></div></div>
+      <div class="code-container">
+        <button class="copy-btn" onclick="copyTerminalContent()"><i class="fas fa-copy"></i> Copy Terminal</button>
+        <div id="terminal" class="terminal">
+          <div id="termInner">
+            <div class="terminal-line"><span class="terminal-prompt">gzcronwebalive$</span> <span class="terminal-command">status</span></div>
+            <div class="terminal-line"><span class="terminal-output">System ready. Waiting for events...</span></div>
+            <div class="terminal-line"><span class="terminal-output">Start your server and click <strong>Connect</strong></span></div>
+          </div>
+        </div>
+      </div>
       <div class="controls">
-        <button class="btn" onclick="connect()">Connect</button>
-        <button class="btn" onclick="disconnect()">Disconnect</button>
-        <button class="btn" onclick="clearTerminal()">Clear</button>
+        <button class="btn" onclick="connect()"><i class="fas fa-plug"></i> Connect</button>
+        <button class="btn" onclick="disconnect()"><i class="fas fa-power-off"></i> Disconnect</button>
+        <button class="btn" onclick="clearTerminal()"><i class="fas fa-broom"></i> Clear</button>
       </div>
     </section>
 
     <section class="card" style="margin-top:16px">
       <h2>Example server (SSE + docs)</h2>
       <p class="small">Save the provided <code>example_server.js</code> and place this <code>index.html</code> under <code>docs/</code>. Start server with <code>node example_server.js</code> — open <code>http://localhost:3000/docs/index.html</code>.</p>
-      <button class="copy" onclick="copyText('serverCode')">Copy server.js</button>
-      <pre id="serverCode">// example_server.js
+      <div class="code-container">
+        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+        <pre id="serverCode">// example_server.js
 const express = require('express');
 const http = require('http');
 const path = require('path');
@@ -100,19 +647,23 @@ events.on('log', msg => {
 
 startCron(); // start the cron
 server.listen(process.env.PORT||3000, () => console.log('Server listening on port', process.env.PORT||3000));</pre>
+      </div>
     </section>
 
     <section class="card" style="margin-top:16px">
       <h2>How logs are emitted</h2>
-      <pre>// in gzcronwebalive index.js
+      <div class="code-container">
+        <button class="copy-btn" onclick="copyCode(this)"><i class="fas fa-copy"></i> Copy</button>
+        <pre>// in gzcronwebalive index.js
 const EventEmitter = require('events');
 const events = new EventEmitter();
 events.emit('log', '🔁 Pinging self...'); // every cron run
 module.exports = { startCron, events };</pre>
+      </div>
       <p class="small">This pattern allows forwarding logs to web UIs, SSE, WebSockets or other sinks.</p>
     </section>
 
-    <footer style="margin-top:18px" class="small">Made with ❤️ by God's Zeal — <a style="color:#8fffd3" href="https://github.com/Godszeal">github.com/Godszeal</a></footer>
+    <footer style="margin-top:18px" class="small">Made with ❤️ by God's Zeal — <a href="https://github.com/Godszeal">github.com/Godszeal</a></footer>
   </div>
 
 <script>
@@ -126,15 +677,15 @@ const charDelay = 45; // typing speed ms per char
 function connect(){
   if(es) return;
   es = new EventSource('/events');
-  appendSystem('SSE: connecting...');
+  appendSystem('SSE: connecting...', 'terminal-output');
   es.onmessage = e => {
     enqueueLine(e.data);
   };
-  es.onerror = () => { appendSystem('⚠️ SSE connection error'); disconnect(); };
+  es.onerror = () => { appendSystem('⚠️ SSE connection error', 'terminal-error'); disconnect(); };
 }
 
 function disconnect(){
-  if(es){ es.close(); es = null; appendSystem('SSE: disconnected'); }
+  if(es){ es.close(); es = null; appendSystem('SSE: disconnected', 'terminal-output'); }
 }
 
 function enqueueLine(text){
@@ -151,7 +702,9 @@ function processQueue(){
 
 function typeLine(line, cb){
   const container = document.createElement('div');
+  container.className = 'terminal-line';
   const span = document.createElement('span');
+  span.className = 'terminal-output';
   const cursor = document.createElement('span');
   cursor.className = 'cursor';
   container.appendChild(span);
@@ -174,19 +727,62 @@ function typeLine(line, cb){
   step();
 }
 
-function appendSystem(text){
+function appendSystem(text, className){
   const div = document.createElement('div');
-  div.textContent = text;
-  div.style.opacity = 0.85;
+  div.className = 'terminal-line';
+  const span = document.createElement('span');
+  span.className = className;
+  span.textContent = text;
+  div.appendChild(span);
   termInner.appendChild(div);
   termInner.parentElement.scrollTop = termInner.parentElement.scrollHeight;
 }
 
 function clearTerminal(){
   termInner.innerHTML = '';
+  appendSystem('Terminal cleared. Waiting for events...', 'terminal-output');
 }
 
-function copyText(id){ navigator.clipboard.writeText(document.getElementById(id).innerText).then(()=>alert('Copied'));}
+// Copy functions
+function copyCode(button) {
+  const pre = button.nextElementSibling;
+  const text = pre.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    button.classList.add('copied');
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.classList.remove('copied');
+    }, 2000);
+  });
+}
+
+function copyInlineCode(button) {
+  const code = button.previousElementSibling;
+  const text = code.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const originalHTML = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i>';
+    setTimeout(() => {
+      button.innerHTML = originalHTML;
+    }, 1500);
+  });
+}
+
+function copyTerminalContent() {
+  const text = termInner.innerText;
+  navigator.clipboard.writeText(text).then(() => {
+    const button = document.querySelector('.copy-btn');
+    const originalText = button.innerHTML;
+    button.innerHTML = '<i class="fas fa-check"></i> Copied!';
+    button.classList.add('copied');
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.classList.remove('copied');
+    }, 2000);
+  });
+}
 </script>
 </body>
 </html>
