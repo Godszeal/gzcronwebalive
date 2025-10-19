@@ -1,4 +1,5 @@
-name: 🚀 Publish gzcronwebalive to npm
+# .github/workflows/publish.yml
+name: Publish to npm on tag
 
 on:
   push:
@@ -9,10 +10,9 @@ jobs:
   publish:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: 20
@@ -22,7 +22,6 @@ jobs:
         run: npm ci
 
       - name: Publish to npm
-        run: npm publish
+        run: npm publish --access public
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          
